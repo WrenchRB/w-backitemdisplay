@@ -29,6 +29,17 @@ if IsDuplicityVersion() then
         TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, datas)
     end)
 
+    -- Thread for handle script restart
+    Citizen.CreateThread(function()
+        Wait(2000)
+        for _, id in ipairs(GetPlayers()) do
+            local xPlayer = QBCore.Functions.GetPlayer(tonumber(id))
+            local weapons = GetWeaponsFromPlayer(xPlayer)
+            datas[xPlayer.PlayerData.source] = weapons
+        end
+        TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, datas)
+        TriggerClientEvent("w-backitemdisplay:forceStart", -1)
+    end)
 else
 
     -- Event to update the player's inventory on the client side
@@ -50,6 +61,12 @@ else
         IsActive = nil
     end)
 
+    -- Event handler for resource restart
+    RegisterNetEvent("w-backitemdisplay:forceStart", function()
+        IsActive = true
+        MonitorActivePlayers() -- Function to monitor active players
+    end)
+
     -- Event handler for when a player loads into the client
     RegisterNetEvent("QBCore:Client:OnPlayerLoaded", function()
         IsActive = true
@@ -64,11 +81,11 @@ else
         for _, weapon in ipairs(playerLoadout) do
             if GetHashKey(weapon.name) == weaponHash then
                 components = weapon.info.attachments or {}
-                tintIndex = weapon.tintIndex
+                tintIndex = weapon.info.tint
 
-                -- Override tintIndex if additional info is provided
-                if weapon.info.tint then
-                    tintIndex = weapon.info.tint
+                -- Override tintIndex if additional info is provided(old qb core edits)
+                if weapon.tintIndex then
+                    tintIndex = weapon.tintIndex
                 elseif weapon.info.tintIndex then
                     tintIndex = weapon.info.tintIndex
                 end
