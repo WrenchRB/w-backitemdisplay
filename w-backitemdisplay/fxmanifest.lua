@@ -3,7 +3,7 @@ game "gta5"
 lua54 'yes'
 name "w-backitemdisplay"
 author "Wrench"
-version "1.0.0"
+version "1.0.1"
 description "w-backitemdisplay visually displays unequipped weapons and items on a player's back for a more immersive role-playing experience."
 
 shared_scripts { 'editable.lua', 'config.lua' }

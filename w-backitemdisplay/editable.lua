@@ -20,7 +20,7 @@ if IsDuplicityVersion() then
             for name, _ in pairs(Weapons) do
                 table.insert(searchItems, name)
             end
-            weapons = exports.ox_inventory:Search(xPlayer, 'slots', searchItems, nil)
+            weapons = exports.ox_inventory:Search(xPlayer., 'slots', searchItems, nil)
         elseif isQb then
             for _, v in pairs(xPlayer.PlayerData.items) do
                 if v.type == "weapon" or ItemBack then
@@ -45,7 +45,7 @@ if IsDuplicityVersion() then
     RegisterNetEvent("w-backitemdisplay:updatePlayer", function()
         if isOxInventory then
             local xPlayer = source -- using source as player ID in ox_inventory
-            local weapons = GetWeaponsFromPlayer({source = xPlayer})
+            local weapons = GetWeaponsFromPlayer(xPlayer)
             datas[xPlayer] = weapons
             TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer)
         elseif isQb then
@@ -69,7 +69,7 @@ if IsDuplicityVersion() then
     AddEventHandler("QBCore:Server:PlayerLoaded", function(xPlayer)
         if isOxInventory then
             local xPlayer = xPlayer.PlayerData.source -- using source as player ID in ox_inventory
-            local weapons = GetWeaponsFromPlayer({source = xPlayer})
+            local weapons = GetWeaponsFromPlayer(xPlayer)
             datas[xPlayer] = weapons
             TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer)
         else
@@ -81,7 +81,7 @@ if IsDuplicityVersion() then
     AddEventHandler("esx:playerLoaded", function(_, xPlayer)
         if isOxInventory then
             local xPlayer = xPlayer.source -- using source as player ID in ox_inventory
-            local weapons = GetWeaponsFromPlayer({source = xPlayer})
+            local weapons = GetWeaponsFromPlayer(xPlayer)
             datas[xPlayer] = weapons
             TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer)
         else
