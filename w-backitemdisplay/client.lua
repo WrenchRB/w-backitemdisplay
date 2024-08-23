@@ -77,7 +77,9 @@ local function attachObjectToBack(objectModel, objectHash, playerLoadout, ped, p
         -- Attach all components to the weapon object
         for _, component in pairs(components) do
             local hash = type(component.component) == "number" and component.component or GetHashKey(component.component)
-            GiveWeaponComponentToWeaponObject(attachedObjects[playerId][objectHash].obj, hash)
+            if DoesWeaponTakeWeaponComponent(objectHash, hash) then
+                GiveWeaponComponentToWeaponObject(attachedObjects[playerId][objectHash].obj, hash)
+            end
         end 
 
         -- Set the tint index if available
