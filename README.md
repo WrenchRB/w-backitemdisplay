@@ -6,7 +6,7 @@
 
 - **Visual Attachments**: Automatically attaches specified weapons and items to a player's back.
 - **Customizable**: Supports customizable attachment points, positioning, and rotation.
-- **Open Source**: Can be adapted to any framework; QBCore requirement is removable.
+- **Open Source**: Can be adapted to any framework; QBCore/ESX requirement is removable.
 - **Component and Tint Support**: Preserves all weapon components and tints.
 - **Optimized Performance**: Minimal impact on server performance with no issues such as vehicle explosions or bullets passing through objects.
 
