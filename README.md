@@ -20,7 +20,7 @@ git clone https://github.com/WrenchRB/w-backitemdisplay.git
 
 3. **Edit `server.cfg`**: Add the following line to your `server.cfg` to start the resource.
 ```
-start backpack_attachments
+start w-backitemdisplay
 ```
 4. **Configuration**: Customize the configuration file `config.lua` to fit your server's needs. Adjust attachment points, positions, and other settings as required.
 
