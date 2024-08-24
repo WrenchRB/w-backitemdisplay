@@ -62,8 +62,10 @@ end
 local function attachObjectToBack(objectModel, objectHash, playerLoadout, ped, playerId)
     -- Check if the object is a weapon or not
     local isWeapon = IsWeaponValid(objectHash)
-
-    if isWeapon then
+    
+    -- Get the back attachment configuration for the object model
+    local backItemConfig = Weapons[objectModel] or Items[objectModel]  -- Check if it's in Weapons or Items table
+    if isWeapon and not backItemConfig.prop then
         -- If it's a weapon, use the weapon functions
         requestWeaponAsset(objectHash)
         attachedObjects[playerId][objectHash] = {
@@ -72,7 +74,7 @@ local function attachObjectToBack(objectModel, objectHash, playerLoadout, ped, p
         }
 
         -- Retrieve weapon components and tint index from the player's loadout
-        local components, tintIndex = GetWeaponData(playerLoadout, objectHash)
+        local components, tintIndex, comos = GetWeaponData(playerLoadout, objectHash)
 
         -- Attach all components to the weapon object
         for _, component in pairs(components) do
@@ -87,8 +89,13 @@ local function attachObjectToBack(objectModel, objectHash, playerLoadout, ped, p
             SetWeaponObjectTintIndex(attachedObjects[playerId][objectHash].obj, tintIndex)
         end
 
+        for hash, value in pairs(comos) do
+            SetWeaponObjectLiveryColor(attachedObjects[playerId][objectHash].obj, hash, value)
+        end
+
     else
         -- If it's not a weapon, use the object functions
+        local objectHash = tonumber(backItemConfig.prop) and backItemConfig.prop or GetHashKey(backItemConfig.prop)
         requestObjectAsset(objectHash)
         attachedObjects[playerId][objectHash] = {
             hash = objectHash,
@@ -99,9 +106,6 @@ local function attachObjectToBack(objectModel, objectHash, playerLoadout, ped, p
     -- Configure the object properties
     SetEntityAsMissionEntity(attachedObjects[playerId][objectHash].obj, true, false)
     SetEntityCollision(attachedObjects[playerId][objectHash].obj, false, false)
-
-    -- Get the back attachment configuration for the object model
-    local backItemConfig = Weapons[objectModel] or Items[objectModel]  -- Check if it's in Weapons or Items table
     
     -- Attach the object to the player's back
     AttachEntityToEntity(
@@ -123,7 +127,7 @@ local function attachObjectToBack(objectModel, objectHash, playerLoadout, ped, p
     )
 
     -- Clean up: remove the object or weapon asset to free up memory
-    if isWeapon then
+    if isWeapon and not backItemConfig.prop then
         RemoveWeaponAsset(objectHash)
     else
         SetModelAsNoLongerNeeded(objectHash)
@@ -206,3 +210,15 @@ function MonitorActivePlayers()
         Wait(UpdateTime*1000)
     end
 end
+
+exports("active", function(state)
+    if IsActive == state then return end
+    IsActive = state
+    if state then
+        MonitorActivePlayers()
+    end
+end)
+
+exports("showmyweapons", function(state)
+    TriggerServerEvent("w-backitemdisplay:updatePlayers", nil, state)
+end)

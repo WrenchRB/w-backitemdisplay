@@ -1,12 +1,16 @@
 if IsDuplicityVersion() then
-    local datas = {} 
+    local datas,deactivePlayers = {}, {}
     local isQb = GetResourceState('qb-core') == 'started'
     local isESX = GetResourceState('es_extended') == 'started'
     local isOxInventory = GetResourceState('ox_inventory') == 'started'
+    local isCodemInventory = GetResourceState('codem-inventory') == 'started' -- not working yet
     if isQb then
         QBCore = exports['qb-core']:GetCoreObject()
     elseif isESX then
         ESX = exports['es_extended']:getSharedObject() -- OG Fivem Framework <3
+    end
+    if UseGtaDefault then
+        isQb, isESX, isOxInventory, isCodemInventory = false, false, false, false
     end
 
     -- Function to get weapons from a player's inventory
@@ -21,6 +25,16 @@ if IsDuplicityVersion() then
                 table.insert(searchItems, name)
             end
             weapons = exports.ox_inventory:Search(xPlayer, 'slots', searchItems, nil)
+        elseif isCodemInventory then
+            local identifier, source
+            if isQb then
+                identifier = xPlayer.PlayerData.citizenid
+                source = xPlayer.PlayerData.source
+            elseif isESX then
+                identifier = xPlayer.identifier
+                source = xPlayer.source
+            end
+            weapons = exports['codem-inventory']:GetInventory(identifier, source)
         elseif isQb then
             for _, v in pairs(xPlayer.PlayerData.items) do
                 if v.type == "weapon" or ItemBack then
@@ -34,15 +48,26 @@ if IsDuplicityVersion() then
                     table.insert(weapons, v)
                 end
             end
-        else
-            -- add your own
         end
 
         return weapons
     end
 
     -- Event to update the player's weapons data on the server
-    RegisterNetEvent("w-backitemdisplay:updatePlayer", function()
+    RegisterNetEvent("w-backitemdisplay:updatePlayer", function(data, remove)
+        local source = source
+        if remove ~= nil then
+            if remove then
+                deactivePlayers[source] = true
+            elseif deactivePlayers[source] then
+                deactivePlayers[source] = nil
+            end
+        end
+        if deactivePlayers[source] then
+            datas[source] = {data}
+            TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, {}, source)
+            return
+        end
         if isOxInventory then
             local xPlayer = source -- using source as player ID in ox_inventory
             local weapons = GetWeaponsFromPlayer(xPlayer)
@@ -61,7 +86,9 @@ if IsDuplicityVersion() then
             datas[xPlayer.source] = weapons
             TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer.source)
         else
-            -- add your own
+            local source = source
+            datas[source] = data
+            TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, data, source)
         end
     end)
 
@@ -106,8 +133,6 @@ if IsDuplicityVersion() then
                 local weapons = GetWeaponsFromPlayer(xPlayer)
                 datas[xPlayer.source] = weapons
                 TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer.source)
-            else
-                -- add your own
             end
         end
         TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, datas)
@@ -117,11 +142,49 @@ else
     local isQb = GetResourceState('qb-core') == 'started'
     local isESX = GetResourceState('es_extended') == 'started'
     local isOxInventory = GetResourceState('ox_inventory') == 'started'
-    local OxItems
+    local isCodemInventory = GetResourceState('codem-inventory') == 'started'
+    if UseGtaDefault then
+        isQb, isESX, isOxInventory, isCodemInventory = false, false, false, false
+    end
+    local OxItems, WeaponsData
     if isOxInventory then
         OxItems = exports.ox_inventory:Items()
     elseif isESX then
         ESX = exports['es_extended']:getSharedObject() -- OG Fivem Framework <3
+    else
+        WeaponsData = json.decode(LoadResourceFile(GetCurrentResourceName(), 'data.json'))
+        Citizen.CreateThread(function ()
+            IsActive = true
+            Citizen.CreateThread(MonitorActivePlayers)
+            while true do
+                local ped = PlayerPedId()
+                local weapons = {}
+                for _, v in pairs(WeaponsData) do
+                    local model = GetHashKey(v.HashKey)
+                    if HasPedGotWeapon(ped, GetHashKey(v.HashKey)) then
+                        local componnets = {}
+                        local camos = {}
+                        for _, v2 in pairs(v.Components) do
+                            local c_model = GetHashKey(v2.HashKey)
+                            if HasPedGotWeaponComponent(ped, model, c_model) then
+                                table.insert(componnets, {component = c_model})
+                                if string.find(string.lower(v2.HashKey), "camo") then
+                                    camos[c_model] = GetPedWeaponLiveryColor(ped, model, v2.HashKey)
+                                end
+                            end
+                        end
+                        table.insert(weapons,{
+                            name = v.HashKey,
+                            tint = GetPedWeaponTintIndex(ped, model),
+                            componnets = componnets,
+                            camos = camos,
+                        })
+                    end
+                end
+                TriggerServerEvent("w-backitemdisplay:updatePlayer", weapons)
+                Wait(1000)
+            end
+        end)
     end
     
     -- Event to update the player's inventory on the client side
@@ -187,7 +250,7 @@ else
 
     -- Function to get weapon data such as components and tint from the player's loadout
     function GetWeaponData(playerLoadout, weaponHash)
-        local components, tempComponents = {}, {}
+        local components, tempComponents, camos = {}, {}, {}
         local tintIndex = nil
         if isOxInventory then
             for _, weapon in ipairs(playerLoadout) do
@@ -203,6 +266,8 @@ else
                     table.insert(components, {component = v2})
                 end
 			end
+        elseif isCodemInventory then
+            -- next update
         elseif isQb then
             for _, weapon in ipairs(playerLoadout) do
                 if GetHashKey(weapon.name) == weaponHash then
@@ -232,8 +297,16 @@ else
 				local component = ESX.GetWeaponComponent(name, v)
                 table.insert(components, {component = component.hash})
 			end
+        else
+            for _, weapon in pairs(playerLoadout) do
+                if GetHashKey(weapon.name) == weaponHash then
+                    components = weapon.componnets or {}
+                    tintIndex = weapon.tint
+                    break
+                end
+            end
         end
 
-        return components, tintIndex
+        return components, tintIndex, camos
     end
 end

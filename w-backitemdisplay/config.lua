@@ -1,9 +1,21 @@
 ItemBack = false -- if you want to add items,set this true
+UseGtaDefault = false -- script handle ped inventory without any framwork(standalone)
 UpdateTime = 0.5 -- 0.5s
 Items = { -- if you want to add items use this part
-
+    ["water"] = {
+        prop = "your water prop",
+        back_bone = 24818,
+        position = {x = 0.0, y = -0.17, z = -0.12},
+        rotation = {x = 0.0, y = -180.0, z = 180.0},
+    },
 }
 Weapons = {
+    ["weapon_katana"] = {
+        prop = "Saya of katana prop", -- new update
+        back_bone = 24817,
+        position = {x = 0.01, y = -0.17, z = 0.0},
+        rotation = {x = 0.0, y = 120.0, z = 0.0},
+    },
     ["weapon_smg"] = {
         back_bone = 24818,
         position = {x = 0.0, y = -0.17, z = -0.12},
