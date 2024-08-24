@@ -64,7 +64,7 @@ if IsDuplicityVersion() then
             end
         end
         if deactivePlayers[source] then
-            datas[source] = {data}
+            datas[source] = {}
             TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, {}, source)
             return
         end
