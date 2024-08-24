@@ -32,7 +32,7 @@ start w-backitemdisplay
 
 ## License
 
-This project is licensed under the GNU General Public License (GNU) v3. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU GENERAL PUBLIC LICENSE v3. See the [LICENSE](LICENSE) file for details.
 
 ## Support
 
