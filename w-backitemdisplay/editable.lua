@@ -169,7 +169,7 @@ else
                             if HasPedGotWeaponComponent(ped, model, c_model) then
                                 table.insert(componnets, {component = c_model})
                                 if string.find(string.lower(v2.HashKey), "camo") then
-                                    camos[c_model] = GetPedWeaponLiveryColor(ped, model, v2.HashKey)
+                                    camos[v2.HashKey] = GetPedWeaponLiveryColor(ped, model, v2.HashKey)
                                 end
                             end
                         end
@@ -302,6 +302,7 @@ else
                 if GetHashKey(weapon.name) == weaponHash then
                     components = weapon.componnets or {}
                     tintIndex = weapon.tint
+                    camos = weapon.camos
                     break
                 end
             end
