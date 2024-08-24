@@ -38,6 +38,10 @@ This project is licensed under the GNU General Public License (GPL) v3. See the 
 
 For any issues or questions, feel free to open an issue on the [GitHub repository](https://github.com/WrenchRB/w-backitemdisplay/issues).
 
+## Discord
+
+[Join](https://discord.gg/RBjWGACJzW)
+
 ## Contributing
 
 Contributions are welcome! Please open a pull request or submit an issue if you have suggestions or improvements.
