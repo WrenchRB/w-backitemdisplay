@@ -53,9 +53,8 @@ if IsDuplicityVersion() then
         return weapons
     end
 
-    -- Event to update the player's weapons data on the server
-    RegisterNetEvent("w-backitemdisplay:updatePlayer", function(data, remove)
-        local source = source
+    -- Function to update the player's weapons data on the server
+    function UpdatePlayer(data, remove, source)
         if remove ~= nil then
             if remove then
                 deactivePlayers[source] = true
@@ -90,7 +89,7 @@ if IsDuplicityVersion() then
             datas[source] = data
             TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, data, source)
         end
-    end)
+    end
 
     -- Event handler for when a player loads into the server
     AddEventHandler("QBCore:Server:PlayerLoaded", function(xPlayer)
