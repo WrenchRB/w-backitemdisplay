@@ -267,7 +267,13 @@ else
                 end
 			end
         elseif isCodemInventory then
-            -- next update
+            for _, weapon in pairs(playerLoadout) do
+                if GetHashKey(weapon.name) == weaponHash then
+                    components = weapon.info.attachments or {}
+                    tintIndex = weapon.info.tint
+                    break
+                end
+            end
         elseif isQb then
             for _, weapon in ipairs(playerLoadout) do
                 if GetHashKey(weapon.name) == weaponHash then
