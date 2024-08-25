@@ -150,7 +150,7 @@ else
         OxItems = exports.ox_inventory:Items()
     elseif isESX then
         ESX = exports['es_extended']:getSharedObject() -- OG Fivem Framework <3
-    else
+    elseif not isQb then
         WeaponsData = json.decode(LoadResourceFile(GetCurrentResourceName(), 'data.json'))
         Citizen.CreateThread(function ()
             IsActive = true
