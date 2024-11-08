@@ -2,6 +2,7 @@ if IsDuplicityVersion() then
     local datas,deactivePlayers = {}, {}
     local isQb = GetResourceState('qb-core') == 'started'
     local isESX = GetResourceState('es_extended') == 'started'
+    local isQBOX = GetResourceState('qbx_core') == 'started'
     local isOxInventory = GetResourceState('ox_inventory') == 'started'
     local isCodemInventory = GetResourceState('codem-inventory') == 'started' -- not working yet
     if isQb then
@@ -18,7 +19,7 @@ if IsDuplicityVersion() then
         local weapons = {}
         if isOxInventory then
             local searchItems = {}
-            for name, _ in pairs(Items) do
+            for name, _ in pairs(Items) do 
                 table.insert(searchItems, name)
             end
             for name, _ in pairs(Weapons) do
@@ -91,19 +92,34 @@ if IsDuplicityVersion() then
         end
     end
 
-    -- Event handler for when a player loads into the server
-    AddEventHandler("QBCore:Server:PlayerLoaded", function(xPlayer)
-        if isOxInventory then
-            local xPlayer = xPlayer.PlayerData.source -- using source as player ID in ox_inventory
-            local weapons = GetWeaponsFromPlayer(xPlayer)
-            datas[xPlayer] = weapons
-            TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer)
-        else
-            local weapons = GetWeaponsFromPlayer(xPlayer)
-            datas[xPlayer.PlayerData.source] = weapons
-            TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, datas)
-        end
-    end)
+    if isQBOX then
+        -- Event handler for when a player loads into the server
+        RegisterNetEvent("QBCore:Server:PlayerLoaded", function()
+            if isOxInventory then
+                local xPlayer = source
+                local weapons = GetWeaponsFromPlayer(xPlayer)
+                datas[xPlayer] = weapons
+                TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer)
+            else
+                -- add your own inventory for oxqb
+            end
+        end)
+    else
+        -- Event handler for when a player loads into the server
+        AddEventHandler("QBCore:Server:PlayerLoaded", function(xPlayer)
+            if isOxInventory then
+                local xPlayer = xPlayer.PlayerData.source -- using source as player ID in ox_inventory
+                local weapons = GetWeaponsFromPlayer(xPlayer)
+                datas[xPlayer] = weapons
+                TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer)
+            else
+                local weapons = GetWeaponsFromPlayer(xPlayer)
+                datas[xPlayer.PlayerData.source] = weapons
+                TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, datas)
+            end
+        end)
+    end
+
     AddEventHandler("esx:playerLoaded", function(_, xPlayer)
         if isOxInventory then
             local xPlayer = xPlayer.source -- using source as player ID in ox_inventory
@@ -132,6 +148,10 @@ if IsDuplicityVersion() then
                 local weapons = GetWeaponsFromPlayer(xPlayer)
                 datas[xPlayer.source] = weapons
                 TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, xPlayer.source)
+            elseif isQBOX then
+                local weapons = GetWeaponsFromPlayer(id)
+                datas[id] = weapons
+                TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, weapons, id)
             end
         end
         TriggerClientEvent("w-backitemdisplay:updatePlayers", -1, datas)
@@ -140,6 +160,7 @@ if IsDuplicityVersion() then
 else
     local isQb = GetResourceState('qb-core') == 'started'
     local isESX = GetResourceState('es_extended') == 'started'
+    local isQBOX = GetResourceState('qbx_core') == 'started'
     local isOxInventory = GetResourceState('ox_inventory') == 'started'
     local isCodemInventory = GetResourceState('codem-inventory') == 'started'
     if UseGtaDefault then
@@ -150,7 +171,7 @@ else
         OxItems = exports.ox_inventory:Items()
     elseif isESX then
         ESX = exports['es_extended']:getSharedObject() -- OG Fivem Framework <3
-    elseif not isQb then
+    elseif not isQb and not isQBOX then
         WeaponsData = json.decode(LoadResourceFile(GetCurrentResourceName(), 'data.json'))
         Citizen.CreateThread(function ()
             IsActive = true
@@ -220,6 +241,15 @@ else
     AddEventHandler('ox_inventory:updateWeaponComponent', function()
         TriggerServerEvent("weaponOnBack:updatePlayer")
     end)
+
+    if isQBOX or BetterSync then
+        Citizen.CreateThread(function ()
+            while true do
+                Wait(1000)
+                TriggerServerEvent("w-backitemdisplay:updatePlayer")
+            end
+        end)
+    end
 
     -- Event to update players' weapons data on the client side
     RegisterNetEvent("w-backitemdisplay:updatePlayers", function(data, playerId)

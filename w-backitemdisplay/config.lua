@@ -1,4 +1,5 @@
 ItemBack = false -- if you want to add items,set this true
+BetterSync = false -- Not recommended
 UseGtaDefault = false -- script handle ped inventory without any framwork(standalone)
 UpdateTime = 0.5 -- 0.5s
 Items = { -- if you want to add items use this part
