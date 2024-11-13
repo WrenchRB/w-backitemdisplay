@@ -25,7 +25,7 @@ if IsDuplicityVersion() then
             for name, _ in pairs(Weapons) do
                 table.insert(searchItems, name)
             end
-            weapons = exports.ox_inventory:Search(xPlayer, 'slots', searchItems, nil)
+            weapons = exports.ox_inventory:Search(xPlayer, 1, searchItems, nil)
         elseif isCodemInventory then
             local identifier, source
             if isQb then
